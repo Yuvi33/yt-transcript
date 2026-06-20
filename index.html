@@ -1,349 +1,86 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Transcript Generator - Free & Easy</title>
-    
-    <!-- Tailwind CSS + DaisyUI -->
+    <title>YouTube Transcript Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet">
-    
-    <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/svgs/brands/youtube.svg">
-    <meta name="theme-color" content="#ffffff">
-    
-    <!-- SEO Meta Tags -->
-    <meta name="title" content="YouTube Transcript Generator - Free & Easy">
-    <meta name="description" content="Get YouTube transcripts instantly. Copy with one click, translate to 125+ languages, perfect for note-taking and content creation.">
-    
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="YouTube Transcript Generator - Free & Easy">
-    <meta property="og:description" content="Get YouTube transcripts instantly. Copy with one click, translate to 125+ languages.">
+    <style>
+        body { font-family: sans-serif; background-color: #f3f4f6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        button { background-color: #dc2626; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; }
+        button:hover { background-color: #b91c1c; }
+        .transcript-box { text-align: left; background: white; padding: 20px; border-radius: 8px; margin-top: 20px; max-height: 400px; overflow-y: auto; border: 1px solid #ccc; }
+        .hidden { display: none; }
+        .loading { color: #6b7280; margin-top: 10px; }
+    </style>
 </head>
-<body class="flex flex-col h-full min-h-screen bg-base-100">
-    
-    <!-- Navigation -->
-    <nav class="navbar bg-base-100 shadow-sm">
-        <div class="navbar-start">
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-                    </svg>
-                </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="#faq">FAQ</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="navbar-center">
-            <a class="text-xl btn btn-ghost" href="/">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 fill-red-500" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-                TranscriptGen
-            </a>
-        </div>
-        <div class="navbar-end">
-            <a href="#" class="btn btn-ghost btn-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <article class="min-h-[calc(100vh-4rem)] hero bg-gradient-to-r from-red-500 to-purple-600 text-white" id="hero">
-        <div class="items-center justify-center text-center hero-content">
-            <div class="max-w-xl">
-                <h1 class="text-4xl font-bold md:text-5xl">YouTube to Transcript</h1>
-                <p class="py-6 text-lg">
-                    Generate YouTube Transcript for FREE. <br>
-                    Access all Transcript Languages, Translate to 125+ Languages, Easy Copy and Edit!
-                </p>
-                
-                <form id="transcriptForm" class="flex flex-col mx-auto sm:flex-row sm:justify-center">
-                    <input 
-                        type="text" 
-                        id="youtubeUrl" 
-                        name="youtube_url" 
-                        placeholder="Paste YouTube URL here..." 
-                        class="w-full mb-2 input input-bordered input-rounded sm:w-96 sm:mb-0 sm:mr-2" 
-                        pattern="^((?:https?:)?\/\/)?((?:www|m|gaming)\.)?((?:youtu.be|youtube.com)(?:\/(?:[\w\-]+\?v=|embed\/|shorts\/|live\/|v\/)?))([\w\-]{11})(\S+)?$" 
-                        required 
-                        autofocus
-                    >
-                    <button type="submit" class="w-full btn btn-secondary btn-rounded sm:w-auto" id="submitBtn">
-                        <span class="hidden loading loading-spinner" id="loadingSpinner"></span>
-                        Get Free Transcript
-                    </button>
-                </form>
-                
-                <p class="pt-6 text-sm">
-                    <strong class="inline-block py-2 mx-4 text-center">
-                        ✓ One-click Copy
-                    </strong>
-                    <strong class="inline-block py-2 mx-4 text-center">
-                        ✓ Supports Translation
-                    </strong>
-                    <strong class="inline-block py-2 mx-4 text-center">
-                        ✓ Multiple Languages
-                    </strong>
-                </p>
-            </div>
-        </div>
-    </article>
-
-    <!-- Features Section -->
-    <section class="w-full py-16 bg-base-100" id="features">
-        <div class="max-w-4xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">Effortlessly Generate YouTube Transcripts 🚀</h2>
-            
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-                <div class="p-6 rounded-box bg-base-200">
-                    <div class="mb-4 text-4xl">⚡</div>
-                    <h3 class="mb-2 text-xl font-bold">Instant Results</h3>
-                    <p>Get transcripts within seconds of pasting your YouTube URL</p>
-                </div>
-                
-                <div class="p-6 rounded-box bg-base-200">
-                    <div class="mb-4 text-4xl">🌍</div>
-                    <h3 class="mb-2 text-xl font-bold">125+ Languages</h3>
-                    <p>Translate transcripts to over 125 languages with one click</p>
-                </div>
-                
-                <div class="p-6 rounded-box bg-base-200">
-                    <div class="mb-4 text-4xl">📋</div>
-                    <h3 class="mb-2 text-xl font-bold">Easy Copy</h3>
-                    <p>Copy entire transcript or specific sections with a single click</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="w-full py-16 bg-base-200" id="how-it-works">
-        <div class="max-w-4xl mx-auto px-4">
-            <h2 class="mb-12 text-3xl font-bold text-center">How to Generate a YouTube Transcript 🎥</h2>
-            
-            <div class="space-y-8">
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold">1</div>
-                    <div>
-                        <h3 class="mb-2 text-xl font-bold">Paste YouTube URL</h3>
-                        <p class="text-gray-600">Copy any YouTube video URL and paste it in the input field above</p>
-                    </div>
-                </div>
-                
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold">2</div>
-                    <div>
-                        <h3 class="mb-2 text-xl font-bold">Get Transcript</h3>
-                        <p class="text-gray-600">Click the "Get Free Transcript" button and wait a few seconds</p>
-                    </div>
-                </div>
-                
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold">3</div>
-                    <div>
-                        <h3 class="mb-2 text-xl font-bold">Copy & Use</h3>
-                        <p class="text-gray-600">Copy the transcript, translate it, or use it with AI tools like ChatGPT</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Transcript Display Section (Hidden initially) -->
-    <section id="transcriptSection" class="hidden w-full py-16 bg-base-100">
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="mb-8 text-center">
-                <h2 class="mb-4 text-3xl font-bold">Your Transcript</h2>
-                <div class="flex justify-center gap-4">
-                    <button onclick="copyTranscript()" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Copy Transcript
-                    </button>
-                    <button onclick="translateTranscript()" class="btn btn-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                        Translate
-                    </button>
-                </div>
-            </div>
-            
-            <div id="transcriptContent" class="p-6 bg-base-200 rounded-box max-h-96 overflow-y-auto">
-                <!-- Transcript content will be inserted here -->
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="w-full py-16 bg-base-200" id="faq">
-        <div class="max-w-4xl mx-auto px-4">
-            <h2 class="mb-12 text-3xl font-bold text-center">Frequently Asked Questions</h2>
-            
-            <div class="space-y-4">
-                <div class="collapse collapse-arrow bg-base-100 rounded-box">
-                    <input type="radio" name="faq-accordion" checked="checked">
-                    <div class="text-xl font-medium collapse-title">
-                        Is YouTube To Transcript free to use?
-                    </div>
-                    <div class="collapse-content">
-                        <p>Yes, YouTube To Transcript is completely free to use. You can easily extract subtitles/transcripts generated by YouTube from YouTube videos without any cost.</p>
-                    </div>
-                </div>
-                
-                <div class="collapse collapse-arrow bg-base-100 rounded-box">
-                    <input type="radio" name="faq-accordion">
-                    <div class="text-xl font-medium collapse-title">
-                        How do I access the transcript after generating it?
-                    </div>
-                    <div class="collapse-content">
-                        <p>Once you've generated the transcript, you can copy it with just one click using the provided Copy button. You can also view the transcript alongside the video using the Embedded Player.</p>
-                    </div>
-                </div>
-                
-                <div class="collapse collapse-arrow bg-base-100 rounded-box">
-                    <input type="radio" name="faq-accordion">
-                    <div class="text-xl font-medium collapse-title">
-                        Can I translate the transcript to other languages?
-                    </div>
-                    <div class="collapse-content">
-                        <p>Absolutely! YouTube To Transcript allows you to translate the subtitles/transcript to over 125 languages. Simply select your desired language using the Translate button.</p>
-                    </div>
-                </div>
-                
-                <div class="collapse collapse-arrow bg-base-100 rounded-box">
-                    <input type="radio" name="faq-accordion">
-                    <div class="text-xl font-medium collapse-title">
-                        Is there a limit to the length of the video I can transcribe?
-                    </div>
-                    <div class="collapse-content">
-                        <p>Currently, there are no limits on the length of the video you can transcribe. You can transcribe videos of any duration seamlessly.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="p-8 footer bg-neutral text-neutral-content">
-        <aside class="items-center grid-flow-row">
-            <p>Copyright © 2024 - All rights reserved.</p>
-        </aside>
-        <nav class="grid-flow-row gap-4 underline md:place-self-center md:justify-self-end">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#faq">FAQ</a>
-            <a href="#contact">Contact</a>
-        </nav>
-    </footer>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-4 right-4 hidden">
-        <div class="flex items-center p-4 rounded-box bg-success text-success-content shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span id="toastMessage">Copied to clipboard!</span>
-        </div>
+<body>
+    <div class="container">
+        <h1>📺 YouTube Transcript Generator</h1>
+        <p>Paste a YouTube URL to get the transcript instantly.</p>
+        
+        <input type="text" id="youtubeUrl" placeholder="Paste YouTube link here...">
+        <button onclick="getTranscript()">Get Transcript</button>
+        
+        <div id="loading" class="loading hidden">Fetching transcript... Please wait.</div>
+        <div id="error" class="loading hidden" style="color: red;"></div>
+        
+        <div id="result" class="transcript-box hidden"></div>
+        <button id="copyBtn" class="hidden" style="margin-top: 15px; background-color: #2563eb;" onclick="copyText()">Copy Transcript</button>
     </div>
 
     <script>
-        // Configuration
-        const API_URL = '/api/transcript';
-        
-        // Form submission
-        document.getElementById('transcriptForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const url = document.getElementById('youtubeUrl').value.trim();
-            const submitBtn = document.getElementById('submitBtn');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            
-            // Show loading
-            submitBtn.disabled = true;
-            loadingSpinner.classList.remove('hidden');
-            
-            try {
-                const response = await fetch(`${API_URL}?url=${encodeURIComponent(url)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    showToast(data.error, 'error');
-                    return;
-                }
-                
-                // Display transcript
-                const transcriptSection = document.getElementById('transcriptSection');
-                const transcriptContent = document.getElementById('transcriptContent');
-                
-                transcriptContent.innerHTML = formatTranscript(data.transcript);
-                transcriptSection.classList.remove('hidden');
-                
-                // Scroll to transcript
-                transcriptSection.scrollIntoView({ behavior: 'smooth' });
-                
-            } catch (error) {
-                showToast('Failed to fetch transcript. Please try again.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                loadingSpinner.classList.add('hidden');
+        async function getTranscript() {
+            const url = document.getElementById('youtubeUrl').value;
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const result = document.getElementById('result');
+            const copyBtn = document.getElementById('copyBtn');
+
+            // Reset UI
+            loading.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            result.classList.add('hidden');
+            copyBtn.classList.add('hidden');
+
+            if (!url) {
+                errorDiv.innerText = "Please enter a URL.";
+                errorDiv.classList.remove('hidden');
+                loading.classList.add('hidden');
+                return;
             }
-        });
-        
-        // Format transcript with timestamps
-        function formatTranscript(transcript) {
-            return transcript.map(item => {
-                const time = formatTime(item.start);
-                return `<div class="py-2 border-b border-base-300">
-                    <span class="font-bold text-primary">[${time}]</span>
-                    ${item.text}
-                </div>`;
-            }).join('');
+
+            try {
+                // Call our serverless function
+                const response = await fetch(`/api/transcript?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Show transcript
+                result.innerHTML = data.transcript.map(item => 
+                    `<div style="margin-bottom: 10px;"><strong>[${Math.floor(item.start / 60)}:${String(Math.floor(item.start % 60)).padStart(2, '0')}]</strong> ${item.text}</div>`
+                ).join('');
+                
+                result.classList.remove('hidden');
+                copyBtn.classList.remove('hidden');
+            } catch (err) {
+                errorDiv.innerText = "Error: " + err.message + ". Make sure the video has subtitles.";
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
         }
-        
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-        
-        // Copy transcript
-        function copyTranscript() {
-            const transcriptText = document.getElementById('transcriptContent').innerText;
-            navigator.clipboard.writeText(transcriptText).then(() => {
-                showToast('Transcript copied to clipboard!');
+
+        function copyText() {
+            const text = document.getElementById('result').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copied to clipboard!");
             });
-        }
-        
-        // Translate transcript (simplified)
-        function translateTranscript() {
-            showToast('Translation feature coming soon!');
-        }
-        
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
         }
     </script>
 </body>

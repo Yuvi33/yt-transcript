@@ -141,6 +141,7 @@
         </div>
     </footer>
 
+    <!-- JavaScript Logic -->
     <script>
         async function getTranscript() {
             const url = document.getElementById('urlInput').value;
@@ -159,30 +160,36 @@
             btnText.innerText = "Loading...";
 
             try {
+                // 1. Extract Video ID
                 let videoId = '';
                 const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([\w-]{11})/);
                 if (match) videoId = match[1];
                 if (!videoId) throw new Error("Invalid YouTube URL. Please check the link.");
 
-                const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+                // 2. Use a stronger proxy to bypass YouTube blocks
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 const ytPageUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
+                // 3. Fetch YouTube page through the proxy
                 const response = await fetch(proxyUrl + encodeURIComponent(ytPageUrl));
                 const html = await response.text();
 
-                const captionRegex = /"captionTracks":(\[.*?\])/;
+                // 4. Use a stronger Regex to find the exact caption URL
+                // YouTube hides the URL and escapes characters, so we look for baseUrl
+                const captionRegex = /"captionTracks":.*?"baseUrl":"(.*?)"/;
                 const captionMatch = html.match(captionRegex);
                 
-                if (!captionMatch) throw new Error("No transcript found. The video might not have subtitles.");
+                if (!captionMatch) throw new Error("No transcript found. The video might not have subtitles (CC).");
 
-                const tracks = JSON.parse(captionMatch[1]);
-                if (tracks.length === 0) throw new Error("No subtitles available for this video.");
-
-                const transcriptUrl = tracks[0].baseUrl + '&fmt=json3';
+                // 5. Clean up the URL (remove YouTube's backslashes)
+                let transcriptUrl = captionMatch[1].replace(/\\u0026/g, '&');
+                transcriptUrl += '&fmt=json3'; // Ask for JSON format
                 
+                // 6. Fetch the actual transcript text using the proxy again
                 const tResponse = await fetch(proxyUrl + encodeURIComponent(transcriptUrl));
                 const tData = await tResponse.json();
 
+                // 7. Format the text to look nice
                 const transcript = tData.events
                     .filter(event => event.segs)
                     .map(event => {
@@ -193,6 +200,7 @@
                         return `<div class="p-2 hover:bg-gray-50 rounded"><span class="font-bold text-blue-600 text-sm">[${min}:${sec < 10 ? '0' + sec : sec}]</span> ${text}</div>`;
                     }).join('');
 
+                // Show the result!
                 result.innerHTML = transcript;
                 resultSection.classList.remove('hidden');
                 status.innerText = "Success! Transcript is ready below.";

@@ -161,25 +161,18 @@
 
             try {
                 // 1. Extract Video ID
-                                if (data.error) throw new Error(data.error);
-
-                // Format the text to look nice
-                const transcriptText = data.transcript.map(event => {
-                    const time = Math.floor(event.start);
-                    const min = Math.floor(time / 60);
-                    const sec = time % 60;
-                    return `<div class="p-2 hover:bg-gray-50 rounded"><span class="font-bold text-blue-600 text-sm">[${min}:${sec < 10 ? '0' + sec : sec}]</span> ${event.text}</div>`;
-                }).join('');
-
-                // Show the result!
-                result.innerHTML = transcriptText;
+                let videoId = '';
+                const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([\w-]{11})/);
+                if (match) videoId = match[1];
+                if (!videoId) throw new Error("Invalid YouTube URL. Please check the link.");
 
                 // 2. Use a stronger proxy to bypass YouTube blocks
-                const apiUrl = `/api/transcript?url=${encodeURIComponent(url)}`;
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const ytPageUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
                 // 3. Fetch YouTube page through the proxy
-                const response = await fetch(apiUrl);
-const data = await response.json();
+                const response = await fetch(proxyUrl + encodeURIComponent(ytPageUrl));
+                const html = await response.text();
 
                 // 4. Use a stronger Regex to find the exact caption URL
                 // YouTube hides the URL and escapes characters, so we look for baseUrl

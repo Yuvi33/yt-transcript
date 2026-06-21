@@ -156,11 +156,18 @@
             btn.disabled = true;
             btnText.innerText = "Loading...";
 
-            try {
-                // Call our own backend API
-                const apiUrl = `/api/transcript?url=${encodeURIComponent(url)}`;
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+               try {
+       // Call our own backend API
+       const apiUrl = `/api/transcript?url=${encodeURIComponent(url)}`;
+       const response = await fetch(apiUrl);
+       
+       // Safety check: If Cloudflare sends HTML instead of JSON, catch it!
+       const contentType = response.headers.get("content-type");
+       if (!contentType || !contentType.includes("application/json")) {
+           throw new Error("Backend is still waking up. Wait 2 minutes and try again.");
+       }
+       
+       const data = await response.json();
 
                 if (data.error) throw new Error(data.error);
 

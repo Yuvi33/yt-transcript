@@ -7,15 +7,12 @@
     <meta name="description" content="Free YouTube Transcript Generator. Extract subtitles and captions from any YouTube video instantly. Copy, translate, and download video transcripts for notes, blogs, and AI tools.">
     <meta name="keywords" content="youtube transcript, video to text, transcript generator, youtube subtitles, extract transcript, free transcript tool">
     
-    <!-- Open Graph / Social Media SEO -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Free YouTube Transcript Generator">
     <meta property="og:description" content="Extract transcripts from YouTube videos instantly. Perfect for note-taking, content creation, and AI tools.">
 
-    <!-- Tailwind CSS for Professional Design -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Schema.org for Google Rich Results -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -108,7 +105,7 @@
             </ol>
         </section>
 
-        <!-- FAQ Section (Great for SEO) -->
+        <!-- FAQ Section -->
         <section class="mb-12">
             <h2 class="text-2xl font-bold mb-6">Frequently Asked Questions (FAQ)</h2>
             <div class="space-y-4">
@@ -160,8 +157,12 @@
             btnText.innerText = "Loading...";
 
             try {
-                // 1. Extract Video ID
-                                if (data.error) throw new Error(data.error);
+                // Call our own backend API
+                const apiUrl = `/api/transcript?url=${encodeURIComponent(url)}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
 
                 // Format the text to look nice
                 const transcriptText = data.transcript.map(event => {
@@ -173,9 +174,6 @@
 
                 // Show the result!
                 result.innerHTML = transcriptText;
-
-                // Show the result!
-                result.innerHTML = transcript;
                 resultSection.classList.remove('hidden');
                 status.innerText = "Success! Transcript is ready below.";
                 status.style.color = "green";
